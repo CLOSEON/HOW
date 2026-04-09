@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Listing</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+    body { background: #0f172a; color: white; }
+
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 40px; background: rgba(255,255,255,0.05);
+      position: sticky; top: 0; backdrop-filter: blur(10px);
+    }
+
+    header h1 { color: #facc15; }
+
+    .search-box input {
+      padding: 8px 12px; border-radius: 8px; border: none; outline: none;
+    }
+
+    .container { padding: 40px; }
+
+    .filters {
+      display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+
+    .filters button {
+      padding: 8px 15px; border: none; border-radius: 20px;
+      background: rgba(255,255,255,0.1); color: white; cursor: pointer;
+    }
+
+    .filters button.active, .filters button:hover {
+      background: #facc15; color: black;
+    }
+
+    .products {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.05); border-radius: 15px;
+      padding: 15px; text-align: center; transition: 0.3s;
+    }
+
+    .card:hover { transform: translateY(-8px); background: rgba(255,255,255,0.1); }
+
+    .card img {
+      width: 100%; height: 160px; object-fit: cover; border-radius: 10px;
+    }
+
+    .card h3 { margin: 10px 0; color: #facc15; }
+
+    .price { font-weight: bold; margin-bottom: 10px; }
+
+    .btn {
+      padding: 8px 12px; border: none; border-radius: 8px;
+      background: #facc15; color: black; cursor: pointer;
+    }
+
+    .btn:hover { opacity: 0.85; }
+
+    footer { text-align: center; padding: 20px; background: rgba(255,255,255,0.05); margin-top: 30px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>ShopX</h1>
+  <div class="search-box">
+    <input type="text" id="search" placeholder="Search products..." onkeyup="searchProducts()" />
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="filters">
+    <button onclick="filterProducts('all')" class="active">All</button>
+    <button onclick="filterProducts('electronics')">Electronics</button>
+    <button onclick="filterProducts('fashion')">Fashion</button>
+    <button onclick="filterProducts('food')">Food</button>
+  </div>
+
+  <div class="products" id="productList">
+
+    <div class="card" data-category="electronics">
+      <img src="https://source.unsplash.com/400x300/?laptop" />
+      <h3>Laptop</h3>
+      <div class="price">₹50,000</div>
+      <button class="btn" onclick="addToCart('Laptop')">Add to Cart</button>
+    </div>
+
+    <div class="card" data-category="fashion">
+      <img src="https://source.unsplash.com/400x300/?shoes" />
+      <h3>Shoes</h3>
+      <div class="price">₹2,000</div>
+      <button class="btn" onclick="addToCart('Shoes')">Add to Cart</button>
+    </div>
+
+    <div class="card" data-category="food">
+      <img src="https://source.unsplash.com/400x300/?burger" />
+      <h3>Burger</h3>
+      <div class="price">₹150</div>
+      <button class="btn" onclick="addToCart('Burger')">Add to Cart</button>
+    </div>
+
+    <div class="card" data-category="electronics">
+      <img src="https://source.unsplash.com/400x300/?headphones" />
+      <h3>Headphones</h3>
+      <div class="price">₹3,000</div>
+      <button class="btn" onclick="addToCart('Headphones')">Add to Cart</button>
+    </div>
+
+  </div>
+
+</div>
+
+<footer>
+  <p>© 2026 ShopX</p>
+</footer>
+
+<script>
+  function filterProducts(category) {
+    const cards = document.querySelectorAll('.card');
+    const buttons = document.querySelectorAll('.filters button');
+
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+
+    cards.forEach(card => {
+      if (category === 'all' || card.dataset.category === category) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  function searchProducts() {
+    const input = document.getElementById('search').value.toLowerCase();
+    const cards = document.querySelectorAll('.card');
+
+    cards.forEach(card => {
+      const name = card.querySelector('h3').innerText.toLowerCase();
+      card.style.display = name.includes(input) ? 'block' : 'none';
+    });
+  }
+
+  function addToCart(product) {
+    alert(product + ' added to cart!');
+  }
+</script>
+
+</body>
+</html>
