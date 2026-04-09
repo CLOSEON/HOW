@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do List</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+    body {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #fff;
+    }
+
+    .app {
+      width: 420px; max-width: 92vw;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      border-radius: 16px; padding: 22px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    h1 { text-align: center; margin-bottom: 16px; color: #facc15; }
+
+    .row { display: flex; gap: 10px; }
+
+    input {
+      flex: 1; padding: 10px 12px; border-radius: 10px; border: none; outline: none;
+    }
+
+    button {
+      padding: 10px 14px; border: none; border-radius: 10px; cursor: pointer;
+      background: #facc15; color: #000; font-weight: 600;
+    }
+
+    button:hover { opacity: 0.9; }
+
+    ul { list-style: none; margin-top: 14px; }
+
+    li {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px; margin-top: 8px; border-radius: 10px;
+      background: rgba(255,255,255,0.08);
+      transition: 0.2s;
+    }
+
+    li.completed { text-decoration: line-through; opacity: 0.6; }
+
+    .left { display: flex; align-items: center; gap: 10px; }
+
+    .actions button {
+      margin-left: 6px; padding: 6px 10px; border-radius: 8px;
+    }
+
+    .delete { background: #ef4444; color: #fff; }
+    .edit { background: #38bdf8; color: #000; }
+
+    .filters {
+      display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;
+    }
+
+    .filters button { background: rgba(255,255,255,0.12); color: #fff; }
+    .filters button.active { background: #facc15; color: #000; }
+
+    .footer {
+      margin-top: 10px; display: flex; justify-content: space-between; font-size: 0.9rem;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <h1>To-Do List</h1>
+
+  <div class="row">
+    <input id="taskInput" type="text" placeholder="Add a new task..." />
+    <button onclick="addTask()">Add</button>
+  </div>
+
+  <div class="filters">
+    <button class="active" onclick="setFilter('all', event)">All</button>
+    <button onclick="setFilter('active', event)">Active</button>
+    <button onclick="setFilter('completed', event)">Completed</button>
+    <button onclick="clearCompleted()">Clear Completed</button>
+  </div>
+
+  <ul id="list"></ul>
+
+  <div class="footer">
+    <span id="count">0 items</span>
+    <span>Saved locally</span>
+  </div>
+</div>
+
+<script>
+  const input = document.getElementById('taskInput');
+  const listEl = document.getElementById('list');
+  const countEl = document.getElementById('count');
+
+  let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+  let filter = 'all';
+
+  function save() {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }
+
+  function render() {
+    listEl.innerHTML = '';
+
+    let filtered = tasks.filter(t => {
+      if (filter === 'active') return !t.done;
+      if (filter === 'completed') return t.done;
+      return true;
+    });
+
+    filtered.forEach((t, i) => {
+      const li = document.createElement('li');
+      if (t.done) li.classList.add('completed');
+
+      const left = document.createElement('div');
+      left.className = 'left';
+
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = t.done;
+      cb.onchange = () => toggle(i);
+
+      const span = document.createElement('span');
+      span.textContent = t.text;
+
+      left.appendChild(cb);
+      left.appendChild(span);
+
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+
+      const editBtn = document.createElement('button');
+      editBtn.className = 'edit';
+      editBtn.textContent = 'Edit';
+      editBtn.onclick = () => editTask(i);
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'delete';
+      delBtn.textContent = 'Delete';
+      delBtn.onclick = () => remove(i);
+
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+
+      li.appendChild(left);
+      li.appendChild(actions);
+
+      listEl.appendChild(li);
+    });
+
+    countEl.textContent = tasks.filter(t => !t.done).length + ' items left';
+  }
+
+  function addTask() {
+    const text = input.value.trim();
+    if (!text) return;
+    tasks.push({ text, done: false });
+    input.value = '';
+    save();
+    render();
+  }
+
+  function toggle(i) {
+    tasks[i].done = !tasks[i].done;
+    save();
+    render();
+  }
+
+  function remove(i) {
+    tasks.splice(i, 1);
+    save();
+    render();
+  }
+
+  function editTask(i) {
+    const newText = prompt('Edit task:', tasks[i].text);
+    if (newText !== null && newText.trim() !== '') {
+      tasks[i].text = newText.trim();
+      save();
+      render();
+    }
+  }
+
+  function setFilter(f, e) {
+    filter = f;
+    document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
+    if (e) e.target.classList.add('active');
+    render();
+  }
+
+  function clearCompleted() {
+    tasks = tasks.filter(t => !t.done);
+    save();
+    render();
+  }
+
+  // Enter key support
+  input.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addTask();
+  });
+
+  render();
+</script>
+
+</body>
+</html>
